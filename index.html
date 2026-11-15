@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Portal Absensi QR - SMKN Kasomalang</title>
+    <title>Portal Login - E-Absensi SMKN Kasomalang</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
 </head>
@@ -13,113 +13,204 @@
         <!-- Header -->
         <div class="text-center space-y-2">
             <div class="w-14 h-14 bg-blue-600 rounded-2xl mx-auto flex items-center justify-center text-2xl shadow-lg shadow-blue-600/30">
-                <i class="fa-solid fa-qrcode"></i>
+                <i class="fa-solid fa-shield-halved"></i>
             </div>
             <h1 class="text-xl font-bold tracking-wide">E-ABSENSI QR</h1>
-            <p class="text-xs text-slate-400">SMKN Kasomalang • Portal Akses Cepat</p>
+            <p class="text-xs text-slate-400">SMKN Kasomalang • Portal Petugas</p>
         </div>
 
-        <!-- Status Koneksi -->
-        <div id="status-box" class="bg-slate-900/70 border border-slate-700 rounded-2xl p-4 text-center space-y-1">
-            <p class="text-xs text-slate-400 flex items-center justify-center gap-2">
-                <i class="fa-solid fa-spinner fa-spin text-blue-400"></i> Mengambil link server aktif...
-            </p>
+        <!-- PANEL 1: FORM LOGIN TUNGGAL -->
+        <div id="login-section" class="space-y-4">
+            <form onsubmit="prosesLogin(event)" class="space-y-3.5">
+                <div>
+                    <label class="block text-xs text-slate-400 mb-1">Username</label>
+                    <input type="text" id="input-user" required placeholder="Masukkan username"
+                        class="w-full px-4 py-3 bg-slate-900 border border-slate-600 rounded-xl text-sm text-white focus:outline-none focus:border-blue-500">
+                </div>
+                <div>
+                    <label class="block text-xs text-slate-400 mb-1">Password</label>
+                    <input type="password" id="input-pass" required placeholder="••••••••"
+                        class="w-full px-4 py-3 bg-slate-900 border border-slate-600 rounded-xl text-sm text-white focus:outline-none focus:border-blue-500">
+                </div>
+                <button type="submit" id="btn-submit" class="w-full py-3.5 bg-blue-600 hover:bg-blue-500 rounded-xl font-bold text-sm transition shadow-lg shadow-blue-600/20">
+                    Masuk ke Portal <i class="fa-solid fa-right-to-bracket ml-1"></i>
+                </button>
+            </form>
+
+            <p id="login-error" class="text-xs text-center text-rose-400 font-semibold hidden"></p>
         </div>
 
-        <!-- Daftar Tombol Direct Link -->
-        <div id="menu-links" class="hidden space-y-3">
-            <a id="btn-dashboard" href="#" class="flex items-center justify-between w-full p-4 bg-blue-600 hover:bg-blue-500 rounded-2xl font-bold text-sm transition shadow-lg shadow-blue-600/20">
-                <span class="flex items-center gap-3"><i class="fa-solid fa-gauge-high text-lg"></i> Masuk Dashboard Admin / Piket</span>
-                <i class="fa-solid fa-arrow-right"></i>
-            </a>
+        <!-- PANEL 2: MENU DIRECT LINK (Tampil setelah login berhasil) -->
+        <div id="portal-section" class="hidden space-y-4">
+            <div class="flex items-center justify-between bg-slate-900/80 border border-slate-700 px-4 py-2.5 rounded-xl">
+                <span id="user-badge" class="text-xs font-semibold text-emerald-400">
+                    <i class="fa-solid fa-circle-check mr-1"></i> Terverifikasi
+                </span>
+                <button onclick="logoutPortal()" class="text-[11px] text-rose-400 hover:underline font-semibold">
+                    <i class="fa-solid fa-power-off mr-1"></i> Keluar
+                </button>
+            </div>
 
-            <div class="pt-2">
-                <p class="text-[11px] uppercase tracking-wider text-slate-400 font-semibold mb-2 px-1">Buka Kamera Scanner HP</p>
-                <div class="grid grid-cols-2 gap-2.5">
-                    <a id="btn-pos1" href="#" class="p-3.5 bg-emerald-600/20 hover:bg-emerald-600 border border-emerald-500/40 rounded-xl text-center text-xs font-bold text-emerald-300 hover:text-white transition">
-                        <i class="fa-solid fa-camera block text-base mb-1"></i> Scanner POS 1
-                    </a>
-                    <a id="btn-pos2" href="#" class="p-3.5 bg-emerald-600/20 hover:bg-emerald-600 border border-emerald-500/40 rounded-xl text-center text-xs font-bold text-emerald-300 hover:text-white transition">
-                        <i class="fa-solid fa-camera block text-base mb-1"></i> Scanner POS 2
-                    </a>
-                    <a id="btn-pos3" href="#" class="p-3.5 bg-emerald-600/20 hover:bg-emerald-600 border border-emerald-500/40 rounded-xl text-center text-xs font-bold text-emerald-300 hover:text-white transition">
-                        <i class="fa-solid fa-camera block text-base mb-1"></i> Scanner POS 3
-                    </a>
-                    <a id="btn-pos4" href="#" class="p-3.5 bg-emerald-600/20 hover:bg-emerald-600 border border-emerald-500/40 rounded-xl text-center text-xs font-bold text-emerald-300 hover:text-white transition">
-                        <i class="fa-solid fa-camera block text-base mb-1"></i> Scanner POS 4
-                    </a>
+            <div id="status-box" class="bg-slate-900/70 border border-slate-700 rounded-2xl p-3.5 text-center space-y-1">
+                <p class="text-xs text-slate-400"><i class="fa-solid fa-spinner fa-spin text-blue-400 mr-1"></i> Menghubungkan ke server...</p>
+            </div>
+
+            <div id="menu-links" class="hidden space-y-3">
+                <a id="btn-dashboard" href="#" class="flex items-center justify-between w-full p-4 bg-blue-600 hover:bg-blue-500 rounded-2xl font-bold text-sm transition shadow-lg shadow-blue-600/20">
+                    <span class="flex items-center gap-3"><i class="fa-solid fa-gauge-high text-lg"></i> Masuk Dashboard Admin / Piket</span>
+                    <i class="fa-solid fa-arrow-right"></i>
+                </a>
+
+                <div class="pt-1">
+                    <p class="text-[11px] uppercase tracking-wider text-slate-400 font-semibold mb-2 px-1">Pilih Pos Kamera Scanner</p>
+                    <div class="grid grid-cols-2 gap-2.5">
+                        <a id="btn-pos1" href="#" class="p-3.5 bg-emerald-600/20 hover:bg-emerald-600 border border-emerald-500/40 rounded-xl text-center text-xs font-bold text-emerald-300 hover:text-white transition">
+                            <i class="fa-solid fa-camera block text-base mb-1"></i> Scanner POS 1
+                        </a>
+                        <a id="btn-pos2" href="#" class="p-3.5 bg-emerald-600/20 hover:bg-emerald-600 border border-emerald-500/40 rounded-xl text-center text-xs font-bold text-emerald-300 hover:text-white transition">
+                            <i class="fa-solid fa-camera block text-base mb-1"></i> Scanner POS 2
+                        </a>
+                        <a id="btn-pos3" href="#" class="p-3.5 bg-emerald-600/20 hover:bg-emerald-600 border border-emerald-500/40 rounded-xl text-center text-xs font-bold text-emerald-300 hover:text-white transition">
+                            <i class="fa-solid fa-camera block text-base mb-1"></i> Scanner POS 3
+                        </a>
+                        <a id="btn-pos4" href="#" class="p-3.5 bg-emerald-600/20 hover:bg-emerald-600 border border-emerald-500/40 rounded-xl text-center text-xs font-bold text-emerald-300 hover:text-white transition">
+                            <i class="fa-solid fa-camera block text-base mb-1"></i> Scanner POS 4
+                        </a>
+                    </div>
                 </div>
             </div>
-        </div>
 
-        <button onclick="ambilLinkTerbaru()" class="w-full py-2.5 bg-slate-700 hover:bg-slate-600 rounded-xl text-xs font-semibold text-slate-300 transition">
-            <i class="fa-solid fa-rotate mr-1"></i> Muat Ulang Link Server
-        </button>
+            <button onclick="muatPortal()" class="w-full py-2.5 bg-slate-700 hover:bg-slate-600 rounded-xl text-xs font-semibold text-slate-300 transition">
+                <i class="fa-solid fa-rotate mr-1"></i> Segarkan Koneksi Server
+            </button>
+        </div>
     </div>
 
     <script>
-const SUPABASE_URL = 'https://welaqxdegjvdxukjtmru.supabase.co';
-const SUPABASE_KEY = 'sb_publishable_5Qi53DDHpMXan5aR-8xItw_YQsfLqAa';
+        const SUPABASE_URL = 'https://welaqxdegjvdxukjtmru.supabase.co';
+        const SUPABASE_KEY = 'sb_publishable_5Qi53DDHpMXan5aR-8xItw_YQsfLqAa';
 
-        async function ambilLinkTerbaru() {
+        const headers = {
+            'apikey': SUPABASE_KEY,
+            'Authorization': `Bearer ${SUPABASE_KEY}`,
+            'Content-Type': 'application/json'
+        };
+
+        function tampilError(msg) {
+            const el = document.getElementById('login-error');
+            el.textContent = msg;
+            el.classList.remove('hidden');
+        }
+
+        async function prosesLogin(e) {
+            e.preventDefault();
+            const btn = document.getElementById('btn-submit');
+            const errEl = document.getElementById('login-error');
+            errEl.classList.add('hidden');
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin mr-1"></i> Memverifikasi...';
+
+            const username = document.getElementById('input-user').value.trim();
+            const password = document.getElementById('input-pass').value.trim();
+
+            try {
+                const res = await fetch(`${SUPABASE_URL}/rest/v1/users?username=eq.${encodeURIComponent(username)}&password=eq.${encodeURIComponent(password)}&select=id,username,nama_lengkap,role`, {
+                    cache: 'no-store',
+                    headers
+                });
+                if (!res.ok) throw new Error(`HTTP ${res.status}`);
+                const users = await res.json();
+
+                if (!users || users.length === 0) {
+                    btn.disabled = false;
+                    btn.innerHTML = 'Masuk ke Portal <i class="fa-solid fa-right-to-bracket ml-1"></i>';
+                    return tampilError('Username atau password salah!');
+                }
+
+                // Simpan sesi dan token kredensial di browser perangkat ini
+                localStorage.setItem('portal_user', JSON.stringify({
+                    username: users[0].username,
+                    password: password,
+                    nama: users[0].nama_lengkap,
+                    role: users[0].role
+                }));
+
+                muatPortal();
+            } catch (err) {
+                tampilError('Gagal terhubung ke database: ' + err.message);
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = 'Masuk ke Portal <i class="fa-solid fa-right-to-bracket ml-1"></i>';
+            }
+        }
+
+        function logoutPortal() {
+            localStorage.removeItem('portal_user');
+            document.getElementById('portal-section').classList.add('hidden');
+            document.getElementById('login-section').classList.remove('hidden');
+        }
+
+        async function muatPortal() {
+            const rawUser = localStorage.getItem('portal_user');
+            if (!rawUser) return;
+
+            const user = JSON.parse(rawUser);
+            document.getElementById('login-section').classList.add('hidden');
+            document.getElementById('portal-section').classList.remove('hidden');
+            document.getElementById('user-badge').innerHTML = `<i class="fa-solid fa-circle-check mr-1"></i> ${user.nama}`;
+
             const statusBox = document.getElementById('status-box');
             const menuLinks = document.getElementById('menu-links');
 
-            statusBox.innerHTML = `<p class="text-xs text-slate-400 flex items-center justify-center gap-2"><i class="fa-solid fa-spinner fa-spin text-blue-400"></i> Menghubungi database...</p>`;
-
             try {
-                // Ambil langsung via REST API Supabase tanpa cache
-                const response = await fetch(`${SUPABASE_URL}/rest/v1/pengaturan?id=eq.1&select=url_publik`, {
-                    method: 'GET',
-                    cache: 'no-store',
-                    headers: {
-                        'apikey': SUPABASE_KEY,
-                        'Authorization': `Bearer ${SUPABASE_KEY}`,
-                        'Content-Type': 'application/json'
-                    }
-                });
+                // Verifikasi ulang akun & ambil url_publik sekaligus
+                const [resUser, resCfg] = await Promise.all([
+                    fetch(`${SUPABASE_URL}/rest/v1/users?username=eq.${encodeURIComponent(user.username)}&password=eq.${encodeURIComponent(user.password)}&select=id`, { cache: 'no-store', headers }),
+                    fetch(`${SUPABASE_URL}/rest/v1/pengaturan?id=eq.1&select=url_publik`, { cache: 'no-store', headers })
+                ]);
 
-                if (!response.ok) {
-                    const errText = await response.text();
-                    throw new Error(`HTTP ${response.status}: ${errText}`);
+                const validUsers = await resUser.json();
+                if (!validUsers || validUsers.length === 0) {
+                    logoutPortal();
+                    return tampilError('Password telah diubah. Silakan login kembali.');
                 }
 
-                const rows = await response.json();
-                if (!rows || rows.length === 0 || !rows[0].url_publik) {
-                    statusBox.innerHTML = `<p class="text-xs text-amber-400 font-semibold"><i class="fa-solid fa-triangle-exclamation mr-1"></i> Kolom url_publik masih kosong di database. Pastikan server.js sudah menampilkan "Link berhasil disimpan ke Supabase!".</p>`;
+                const cfgRows = await resCfg.json();
+                const cfg = cfgRows[0];
+
+                if (!cfg || !cfg.url_publik) {
+                    statusBox.innerHTML = `<p class="text-xs text-amber-400 font-semibold">Server sekolah belum dinyalakan hari ini.</p>`;
                     menuLinks.classList.add('hidden');
                     return;
                 }
 
-                const baseUrl = rows[0].url_publik.replace(/\/$/, '');
-                statusBox.innerHTML = `
-                    <p class="text-[11px] text-emerald-400 font-bold"><i class="fa-solid fa-circle-check mr-1"></i> Server Aktif & Terhubung</p>
-                    <p class="text-[11px] text-slate-400 truncate font-mono">${baseUrl}</p>
-                `;
+                const baseUrl = cfg.url_publik.replace(/\/$/, '');
+                // Buat token akses gabungan username:password (base64) untuk dibawa ke halaman scanner
+                const authToken = encodeURIComponent(btoa(`${user.username}:${user.password}`));
+
+                statusBox.innerHTML = `<p class="text-[11px] text-emerald-400 font-bold"><i class="fa-solid fa-server mr-1"></i> Server Sekolah Aktif</p>`;
 
                 document.getElementById('btn-dashboard').href = `${baseUrl}/login.html`;
-                document.getElementById('btn-pos1').href = `${baseUrl}/scan.html?pos=POS-1`;
-                document.getElementById('btn-pos2').href = `${baseUrl}/scan.html?pos=POS-2`;
-                document.getElementById('btn-pos3').href = `${baseUrl}/scan.html?pos=POS-3`;
-                document.getElementById('btn-pos4').href = `${baseUrl}/scan.html?pos=POS-4`;
+                document.getElementById('btn-pos1').href = `${baseUrl}/scan.html?pos=POS-1&token=${authToken}`;
+                document.getElementById('btn-pos2').href = `${baseUrl}/scan.html?pos=POS-2&token=${authToken}`;
+                document.getElementById('btn-pos3').href = `${baseUrl}/scan.html?pos=POS-3&token=${authToken}`;
+                document.getElementById('btn-pos4').href = `${baseUrl}/scan.html?pos=POS-4&token=${authToken}`;
 
                 const params = new URLSearchParams(window.location.search);
                 const autoTarget = params.get('auto');
                 if (autoTarget === 'dashboard') window.location.replace(`${baseUrl}/login.html`);
-                if (autoTarget === 'pos1') window.location.replace(`${baseUrl}/scan.html?pos=POS-1`);
-                if (autoTarget === 'pos2') window.location.replace(`${baseUrl}/scan.html?pos=POS-2`);
-                if (autoTarget === 'pos3') window.location.replace(`${baseUrl}/scan.html?pos=POS-3`);
-                if (autoTarget === 'pos4') window.location.replace(`${baseUrl}/scan.html?pos=POS-4`);
+                if (autoTarget === 'pos1') window.location.replace(`${baseUrl}/scan.html?pos=POS-1&token=${authToken}`);
+                if (autoTarget === 'pos2') window.location.replace(`${baseUrl}/scan.html?pos=POS-2&token=${authToken}`);
+                if (autoTarget === 'pos3') window.location.replace(`${baseUrl}/scan.html?pos=POS-3&token=${authToken}`);
+                if (autoTarget === 'pos4') window.location.replace(`${baseUrl}/scan.html?pos=POS-4&token=${authToken}`);
 
                 menuLinks.classList.remove('hidden');
             } catch (err) {
-                console.error(err);
-                statusBox.innerHTML = `<p class="text-xs text-rose-400 font-semibold break-words"><i class="fa-solid fa-circle-xmark mr-1"></i> Gagal memuat: ${err.message}</p>`;
-                menuLinks.classList.add('hidden');
+                statusBox.innerHTML = `<p class="text-xs text-rose-400 font-semibold">Error: ${err.message}</p>`;
             }
         }
 
-        ambilLinkTerbaru();
+        muatPortal();
     </script>
 </body>
 </html>
