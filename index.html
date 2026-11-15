@@ -7,33 +7,56 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
 </head>
-<body class="bg-slate-900 text-white min-h-screen flex items-center justify-center p-4 font-sans">
+<body class="bg-slate-950 text-white min-h-screen flex items-center justify-center p-4 font-sans relative overflow-x-hidden selection:bg-blue-500/30 selection:text-blue-200">
 
-    <div class="w-full max-w-md bg-slate-800 border border-slate-700 rounded-3xl p-6 sm:p-8 shadow-2xl space-y-6">
-        <!-- Header -->
-        <div class="text-center space-y-2">
-            <div class="w-14 h-14 bg-blue-600 rounded-2xl mx-auto flex items-center justify-center text-2xl shadow-lg shadow-blue-600/30">
-                <i class="fa-solid fa-shield-halved"></i>
+    <!-- Efek Cahaya Latar Belakang (Ambient Glow) -->
+    <div class="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[28rem] h-[28rem] bg-blue-600/15 rounded-full blur-3xl pointer-events-none"></div>
+
+    <!-- Kartu Utama -->
+    <div class="relative w-full max-w-md bg-slate-900/85 backdrop-blur-xl border border-slate-700/70 rounded-3xl p-6 sm:p-8 shadow-[0_20px_50px_rgba(0,0,0,0.6)] space-y-6 overflow-hidden">
+        
+        <!-- Garis Cahaya Tipis di Puncak Kartu -->
+        <div class="absolute top-0 inset-x-0 h-px bg-gradient-to-r from-transparent via-blue-400/60 to-transparent"></div>
+
+        <!-- HEADER / LOGO TIPOGRAFI (Tanpa Kotak Ikon) -->
+        <div class="text-center space-y-2.5 pt-1">
+            <span class="inline-flex items-center gap-2 px-3.5 py-1 text-[10px] font-bold tracking-[0.2em] uppercase text-blue-400">
+                <span class="w-1.5 h-1.5 rounded-full bg-green-400 animate-pulse"></span>
+                Absensi Siswa
+            </span>
+
+            <div class="space-y-1">
+                <h1 class="text-2xl sm:text-[26px] font-black tracking-tight text-white">
+                    SMKN <span class="bg-gradient-to-r from-blue-400 to-cyan-300 bg-clip-text text-transparent">KASOMALANG</span>
+                </h1>
+                <div class="flex items-center justify-center gap-2 text-xs font-medium text-slate-400">
+                    <span class="h-px w-4 bg-slate-700"></span>
+                    <span>Portal Petugas</span>
+                    <span class="h-px w-4 bg-slate-700"></span>
+                </div>
             </div>
-            <h1 class="text-xl font-bold tracking-wide">ABSEN - SMKN KASOMALANGR</h1>
-            <p class="text-xs text-slate-400">Portal Petugas</p>
         </div>
 
         <!-- PANEL 1: FORM LOGIN TUNGGAL -->
         <div id="login-section" class="space-y-4">
-            <form onsubmit="prosesLogin(event)" class="space-y-3.5">
+            <form onsubmit="prosesLogin(event)" class="space-y-4">
                 <div>
-                    <label class="block text-xs text-slate-400 mb-1">Username</label>
-                    <input type="text" id="input-user" required placeholder="Masukkan username"
-                        class="w-full px-4 py-3 bg-slate-900 border border-slate-600 rounded-xl text-sm text-white focus:outline-none focus:border-blue-500">
+                    <div class="relative">
+                        <i class="fa-solid fa-user text-xs text-slate-500 absolute left-3.5 top-1/2 -translate-y-1/2"></i>
+                        <input type="text" id="input-user" required placeholder="Masukkan username"
+                            class="w-full pl-10 pr-4 py-3 bg-slate-950/70 border border-slate-700/80 rounded-xl text-sm text-white placeholder-slate-500 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition">
+                    </div>
                 </div>
                 <div>
-                    <label class="block text-xs text-slate-400 mb-1">Password</label>
-                    <input type="password" id="input-pass" required placeholder="••••••••"
-                        class="w-full px-4 py-3 bg-slate-900 border border-slate-600 rounded-xl text-sm text-white focus:outline-none focus:border-blue-500">
+                    <div class="relative">
+                        <i class="fa-solid fa-lock text-xs text-slate-500 absolute left-3.5 top-1/2 -translate-y-1/2"></i>
+                        <input type="password" id="input-pass" required placeholder="Masukan Password"
+                            class="w-full pl-10 pr-4 py-3 bg-slate-950/70 border border-slate-700/80 rounded-xl text-sm text-white placeholder-slate-500 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition">
+                    </div>
                 </div>
-                <button type="submit" id="btn-submit" class="w-full py-3.5 bg-blue-600 hover:bg-blue-500 rounded-xl font-bold text-sm transition shadow-lg shadow-blue-600/20">
-                    Masuk ke Portal <i class="fa-solid fa-right-to-bracket ml-1"></i>
+                <button type="submit" id="btn-submit"
+                    class="w-full py-3.5 bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-500 hover:to-blue-400 rounded-xl font-bold text-sm text-white transition-all duration-200 shadow-lg shadow-blue-600/25 active:scale-[0.98] cursor-pointer">
+                    Masuk ke Portal <i class="fa-solid fa-right-to-bracket ml-1.5"></i>
                 </button>
             </form>
 
@@ -42,49 +65,64 @@
 
         <!-- PANEL 2: MENU DIRECT LINK (Tampil setelah login berhasil) -->
         <div id="portal-section" class="hidden space-y-4">
-            <div class="flex items-center justify-between bg-slate-900/80 border border-slate-700 px-4 py-2.5 rounded-xl">
+            <div class="flex items-center justify-between bg-slate-950/60 border border-slate-700/80 px-4 py-2.5 rounded-xl">
                 <span id="user-badge" class="text-xs font-semibold text-emerald-400">
-                    <i class="fa-solid fa-circle-check mr-1"></i> Terverifikasi
+                    <i class="fa-solid fa-circle-check mr-1.5"></i> Terverifikasi
                 </span>
-                <button onclick="logoutPortal()" class="text-[11px] text-rose-400 hover:underline font-semibold">
+                <button onclick="logoutPortal()" class="text-[11px] text-rose-400 hover:text-rose-300 hover:underline font-semibold transition cursor-pointer">
                     <i class="fa-solid fa-power-off mr-1"></i> Keluar
                 </button>
             </div>
 
             <!-- Kotak Status Server -->
-            <div id="status-box" class="bg-slate-900/70 border border-slate-700 rounded-2xl p-4 text-center space-y-1.5">
-                <p class="text-xs text-slate-400"><i class="fa-solid fa-spinner fa-spin text-blue-400 mr-1"></i> Memeriksa koneksi PC Server sekolah...</p>
+            <div id="status-box" class="bg-slate-950/60 border border-slate-700/80 rounded-2xl p-4 text-center space-y-1.5">
+                <p class="text-xs text-slate-400">
+                    <i class="fa-solid fa-spinner fa-spin text-blue-400 mr-1.5"></i> Memeriksa koneksi PC Server sekolah...
+                </p>
             </div>
 
-            <div id="menu-links" class="hidden space-y-3">
-                <a id="btn-dashboard" href="#" class="flex items-center justify-between w-full p-4 bg-blue-600 hover:bg-blue-500 rounded-2xl font-bold text-sm transition shadow-lg shadow-blue-600/20">
-                    <span class="flex items-center gap-3"><i class="fa-solid fa-gauge-high text-lg"></i> Masuk Dashboard Admin / Piket</span>
-                    <i class="fa-solid fa-arrow-right"></i>
+            <div id="menu-links" class="hidden space-y-3.5">
+                <a id="btn-dashboard" href="#"
+                    class="group flex items-center justify-between w-full p-4 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 rounded-2xl font-bold text-sm transition-all duration-200 shadow-lg shadow-blue-600/25">
+                    <span class="flex items-center gap-3">
+                        <i class="fa-solid fa-gauge-high text-lg"></i> Masuk Dashboard Admin / Piket
+                    </span>
+                    <i class="fa-solid fa-arrow-right group-hover:translate-x-1 transition-transform"></i>
                 </a>
 
                 <div class="pt-1">
-                    <p class="text-[11px] uppercase tracking-wider text-slate-400 font-semibold mb-2 px-1">Pilih Pos Kamera Scanner</p>
+                    <p class="text-[11px] uppercase tracking-wider text-slate-400 font-semibold mb-2.5 px-1">Pilih Pos Kamera Scanner</p>
                     <div class="grid grid-cols-2 gap-2.5">
-                        <a id="btn-pos1" href="#" class="p-3.5 bg-emerald-600/20 hover:bg-emerald-600 border border-emerald-500/40 rounded-xl text-center text-xs font-bold text-emerald-300 hover:text-white transition">
-                            <i class="fa-solid fa-camera block text-base mb-1"></i> Scanner POS 1
+                        <a id="btn-pos1" href="#" class="group p-3.5 bg-emerald-500/10 hover:bg-emerald-600 border border-emerald-500/30 hover:border-emerald-400 rounded-xl text-center text-xs font-bold text-emerald-300 hover:text-white transition-all duration-200">
+                            <i class="fa-solid fa-camera block text-base mb-1.5 group-hover:scale-110 transition-transform"></i> Scanner POS 1
                         </a>
-                        <a id="btn-pos2" href="#" class="p-3.5 bg-emerald-600/20 hover:bg-emerald-600 border border-emerald-500/40 rounded-xl text-center text-xs font-bold text-emerald-300 hover:text-white transition">
-                            <i class="fa-solid fa-camera block text-base mb-1"></i> Scanner POS 2
+                        <a id="btn-pos2" href="#" class="group p-3.5 bg-emerald-500/10 hover:bg-emerald-600 border border-emerald-500/30 hover:border-emerald-400 rounded-xl text-center text-xs font-bold text-emerald-300 hover:text-white transition-all duration-200">
+                            <i class="fa-solid fa-camera block text-base mb-1.5 group-hover:scale-110 transition-transform"></i> Scanner POS 2
                         </a>
-                        <a id="btn-pos3" href="#" class="p-3.5 bg-emerald-600/20 hover:bg-emerald-600 border border-emerald-500/40 rounded-xl text-center text-xs font-bold text-emerald-300 hover:text-white transition">
-                            <i class="fa-solid fa-camera block text-base mb-1"></i> Scanner POS 3
+                        <a id="btn-pos3" href="#" class="group p-3.5 bg-emerald-500/10 hover:bg-emerald-600 border border-emerald-500/30 hover:border-emerald-400 rounded-xl text-center text-xs font-bold text-emerald-300 hover:text-white transition-all duration-200">
+                            <i class="fa-solid fa-camera block text-base mb-1.5 group-hover:scale-110 transition-transform"></i> Scanner POS 3
                         </a>
-                        <a id="btn-pos4" href="#" class="p-3.5 bg-emerald-600/20 hover:bg-emerald-600 border border-emerald-500/40 rounded-xl text-center text-xs font-bold text-emerald-300 hover:text-white transition">
-                            <i class="fa-solid fa-camera block text-base mb-1"></i> Scanner POS 4
+                        <a id="btn-pos4" href="#" class="group p-3.5 bg-emerald-500/10 hover:bg-emerald-600 border border-emerald-500/30 hover:border-emerald-400 rounded-xl text-center text-xs font-bold text-emerald-300 hover:text-white transition-all duration-200">
+                            <i class="fa-solid fa-camera block text-base mb-1.5 group-hover:scale-110 transition-transform"></i> Scanner POS 4
                         </a>
                     </div>
                 </div>
             </div>
 
-            <button onclick="muatPortal()" class="w-full py-2.5 bg-slate-700 hover:bg-slate-600 rounded-xl text-xs font-semibold text-slate-300 transition">
-                <i class="fa-solid fa-rotate mr-1"></i> Cek Ulang Status Server
+            <button onclick="muatPortal()" class="w-full py-2.5 bg-slate-800 hover:bg-slate-700 border border-slate-700 rounded-xl text-xs font-semibold text-slate-300 transition cursor-pointer">
+                <i class="fa-solid fa-rotate mr-1.5"></i> Cek Ulang Status Server
             </button>
         </div>
+
+        <!-- FOOTER (Sudah Disesuaikan untuk Tema Gelap) -->
+        <footer class="w-full pt-4 border-t border-slate-700/60 text-center">
+            <p class="text-[11px] text-slate-400">
+                &copy; 2026 Sistem Absensi <b class="font-semibold text-slate-300">SMKN Kasomalang</b>
+                <span class="mx-1.5 text-slate-600">&bull;</span>
+                <span class="font-mono text-slate-600">//</span><span class="font-semibold text-slate-600">ngapel</span>
+            </p>
+        </footer>
+
     </div>
 
     <script>
@@ -259,9 +297,4 @@
         muatPortal();
     </script>
 </body>
-    <footer class="w-full py-4 px-6 border-t border-slate-200/80 bg-white/50 text-center">
-    <p class="text-xs text-slate-500">
-        &copy; Sistem Absensi <span class="font-semibold text-slate-700">SMKN Kasomalang</span>. ngapel.
-    </p>
-</footer>
 </html>
