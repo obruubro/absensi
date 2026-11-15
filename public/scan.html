@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Kiosk Scanner Absensi QR</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
+    <style>
+        @keyframes popIn {
+            0% { transform: scale(0.92); opacity: 0; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+        .animate-pop { animation: popIn 0.2s ease-out forwards; }
+        /* Merapikan tampilan kotak kamera html5-qrcode */
+        #reader video { border-radius: 1rem; object-fit: cover; }
+        #reader__scan_region { background: transparent !important; }
+        #reader__dashboard { display: none !important; }
+    </style>
+</head>
+<body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col justify-between select-none">
+
+    <!-- TOP BAR -->
+    <header class="bg-slate-900/95 border-b border-slate-800 px-4 py-3 flex justify-between items-center sticky top-0 z-20">
+        <div class="flex items-center gap-2.5">
+            <div class="w-9 h-9 rounded-xl bg-blue-600 flex items-center justify-center text-white shadow-lg shadow-blue-600/30">
+                <i class="fa-solid fa-qrcode"></i>
+            </div>
+            <div>
+                <div class="flex items-center gap-2">
+                    <span class="font-bold text-sm text-white">ABSENSI</span>
+                    <select id="pos-selector" onchange="changePos(this.value)"
+                            class="bg-blue-600/20 text-blue-400 border border-blue-500/40 text-xs font-bold px-2 py-0.5 rounded-full focus:outline-none">
+                        <option value="POS-1">POS-1</option>
+                        <option value="POS-2">POS-2</option>
+                        <option value="POS-3">POS-3</option>
+                        <option value="POS-4">POS-4</option>
+                    </select>
+                </div>
+                <p id="tanggal-hari-ini" class="text-[10px] text-slate-400"></p>
+            </div>
+        </div>
+
+        <div class="flex items-center gap-3">
+            <p id="jam-realtime" class="font-mono text-base sm:text-xl font-bold text-emerald-400">00:00:00</p>
+            <a href="/dashboard.html" class="w-8 h-8 rounded-xl bg-slate-800 text-slate-300 flex items-center justify-center">
+                <i class="fa-solid fa-gauge-high text-xs"></i>
+            </a>
+        </div>
+    </header>
+
+    <!-- MAIN CONTENT -->
+    <main class="flex-1 flex flex-col items-center p-4 max-w-md w-full mx-auto space-y-4">
+
+        <!-- Switch Mode Scanner -->
+        <div class="grid grid-cols-2 gap-2 w-full bg-slate-900 p-1 rounded-xl border border-slate-800">
+            <button id="btn-mode-cam" onclick="setMode('camera')" class="py-2 rounded-lg text-xs font-bold bg-blue-600 text-white transition flex items-center justify-center gap-1.5">
+                <i class="fa-solid fa-camera"></i> Kamera HP Android
+            </button>
+            <button id="btn-mode-usb" onclick="setMode('usb')" class="py-2 rounded-lg text-xs font-bold text-slate-400 hover:text-white transition flex items-center justify-center gap-1.5">
+                <i class="fa-solid fa-barcode"></i> Alat Scanner USB
+            </button>
+        </div>
+
+        <!-- AREA 1: KAMERA HP ANDROID -->
+        <div id="area-camera" class="w-full space-y-2.5">
+            <div class="relative bg-slate-900 border-2 border-slate-800 rounded-2xl overflow-hidden shadow-lg">
+                <div id="reader" class="w-full min-h-[260px] flex items-center justify-center"></div>
+                <div id="cam-loading" class="absolute inset-0 flex flex-col items-center justify-center bg-slate-900 text-slate-400 text-xs p-4 text-center">
+                    <i class="fa-solid fa-camera text-2xl mb-2 text-blue-500 animate-bounce"></i>
+                    <p>Menyiapkan kamera... Klik <b>Izinkan (Allow)</b> jika muncul permintaan akses kamera.</p>
+                </div>
+            </div>
+            <div class="flex justify-between items-center px-1">
+                <span id="cam-status" class="text-[11px] text-emerald-400 flex items-center gap-1.5">
+                    <span class="w-2 h-2 rounded-full bg-emerald-400 animate-ping"></span> Kamera Aktif
+                </span>
+                <button onclick="switchCameraFacing()" class="text-xs bg-slate-800 hover:bg-slate-700 text-slate-200 px-3 py-1.5 rounded-lg flex items-center gap-1.5">
+                    <i class="fa-solid fa-camera-rotate"></i> Balik Kamera
+                </button>
+            </div>
+        </div>
+
+        <!-- AREA 2: SCANNER USB -->
+        <div id="area-usb" class="hidden w-full">
+            <input type="text" id="qr-input" autocomplete="off"
+                   class="w-full text-center font-mono text-xl font-bold tracking-widest py-4 px-4 rounded-2xl bg-slate-900 border-2 border-blue-500 text-white placeholder-slate-600 focus:outline-none"
+                   placeholder="TEMPELKAN KARTU...">
+        </div>
+
+        <!-- KARTU HASIL SCAN -->
+        <div id="status-container" class="w-full">
+            <div id="standby-card" class="bg-slate-900/60 border border-dashed border-slate-800 rounded-2xl p-4 text-center text-slate-500">
+                <p class="text-xs font-medium">Arahkan QR Code kartu pelajar ke kotak kamera</p>
+            </div>
+
+            <div id="result-card" class="hidden rounded-2xl p-5 text-center shadow-2xl border transition-all animate-pop">
+                <div id="res-icon" class="w-12 h-12 rounded-full bg-white/20 flex items-center justify-center text-xl mx-auto mb-2"></div>
+                <span id="res-badge" class="inline-block px-3 py-0.5 rounded-full text-[11px] font-extrabold uppercase bg-black/25 mb-1"></span>
+                <h2 id="res-nama" class="text-xl font-extrabold text-white leading-tight"></h2>
+                <p id="res-kelas" class="text-xs font-medium text-white/90 mt-1"></p>
+                <div class="mt-3 pt-2.5 border-t border-white/20 flex justify-center gap-4 text-[11px] text-white/90">
+                    <span id="res-waktu"></span>
+                    <span id="res-wa-info"></span>
+                </div>
+            </div>
+        </div>
+
+        <!-- RIWAYAT POS INI -->
+        <div class="w-full bg-slate-900/80 border border-slate-800 rounded-2xl overflow-hidden">
+            <div class="px-4 py-2 bg-slate-900 border-b border-slate-800 flex justify-between items-center text-xs">
+                <span class="font-semibold text-slate-400">Riwayat Pos Ini</span>
+                <span id="pos-counter" class="bg-slate-800 text-slate-300 px-2 py-0.5 rounded font-mono">0 siswa</span>
+            </div>
+            <ul id="recent-list" class="divide-y divide-slate-800/70 text-xs max-h-36 overflow-y-auto">
+                <li id="empty-recent" class="px-4 py-3 text-center text-slate-600">Belum ada scan</li>
+            </ul>
+        </div>
+    </main>
+
+    <script>
+        // 1. Setup POS & Waktu
+        const urlParams = new URLSearchParams(window.location.search);
+        let currentPos = (urlParams.get('pos') || 'POS-1').toUpperCase();
+        const posSelector = document.getElementById('pos-selector');
+        if ([...posSelector.options].some(o => o.value === currentPos)) posSelector.value = currentPos;
+
+        function changePos(newPos) {
+            const url = new URL(window.location);
+            url.searchParams.set('pos', newPos);
+            window.location.href = url.toString();
+        }
+
+        document.getElementById('tanggal-hari-ini').innerText = new Date().toLocaleDateString('id-ID', {
+            weekday: 'short', day: 'numeric', month: 'short', year: 'numeric'
+        });
+        setInterval(() => {
+            document.getElementById('jam-realtime').innerText = new Date().toLocaleTimeString('id-ID', { hour12: false });
+        }, 500);
+
+        // 2. Efek Suara Beep
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        function playBeep(type) {
+            if (audioCtx.state === 'suspended') audioCtx.resume();
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
+            if (type === 'success') {
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(880, audioCtx.currentTime);
+                osc.frequency.setValueAtTime(1174, audioCtx.currentTime + 0.1);
+                gain.gain.setValueAtTime(0.3, audioCtx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.25);
+                osc.start(); osc.stop(audioCtx.currentTime + 0.25);
+            } else {
+                osc.type = 'sawtooth';
+                osc.frequency.setValueAtTime(200, audioCtx.currentTime);
+                gain.gain.setValueAtTime(0.3, audioCtx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.4);
+                osc.start(); osc.stop(audioCtx.currentTime + 0.4);
+            }
+        }
+
+        // 3. Kamera HP Android (html5-qrcode)
+        let html5QrCode = null;
+        let facingMode = "environment"; // Default kamera belakang ("user" untuk kamera depan)
+        let isProcessingScan = false;
+        let lastScannedCode = "";
+        let lastScanTime = 0;
+
+        async function startCamera() {
+            document.getElementById('cam-loading').classList.remove('hidden');
+            if (!html5QrCode) html5QrCode = new Html5Qrcode("reader");
+
+            try {
+                await html5QrCode.start(
+                    { facingMode: facingMode },
+                    { fps: 12, qrbox: { width: 220, height: 220 } },
+                    (decodedText) => {
+                        const now = Date.now();
+                        // Cegah spam scan kartu yang sama dalam 3 detik
+                        if (isProcessingScan || (decodedText === lastScannedCode && now - lastScanTime < 3000)) return;
+                        lastScannedCode = decodedText;
+                        lastScanTime = now;
+                        submitScan(decodedText);
+                    },
+                    () => {} // Abaikan frame yang belum terbaca QR
+                );
+                document.getElementById('cam-loading').classList.add('hidden');
+                document.getElementById('cam-status').innerHTML = `<span class="w-2 h-2 rounded-full bg-emerald-400 animate-ping"></span> Kamera ${facingMode === 'environment' ? 'Belakang' : 'Depan'} Aktif`;
+            } catch (err) {
+                document.getElementById('cam-loading').innerHTML = `
+                    <i class="fa-solid fa-triangle-exclamation text-2xl text-rose-500 mb-2"></i>
+                    <p class="text-rose-400 font-bold">Gagal membuka kamera!</p>
+                    <p class="mt-1">Pastikan alamat menggunakan <b>https://</b> dan izin kamera browser aktif.</p>`;
+            }
+        }
+
+        async function stopCamera() {
+            if (html5QrCode && html5QrCode.isScanning) {
+                await html5QrCode.stop();
+            }
+        }
+
+        async function switchCameraFacing() {
+            await stopCamera();
+            facingMode = facingMode === "environment" ? "user" : "environment";
+            startCamera();
+        }
+
+        // 4. Switch Mode (Kamera HP vs USB)
+        let currentMode = 'camera';
+        const input = document.getElementById('qr-input');
+
+        async function setMode(mode) {
+            currentMode = mode;
+            const btnCam = document.getElementById('btn-mode-cam');
+            const btnUsb = document.getElementById('btn-mode-usb');
+
+            if (mode === 'camera') {
+                btnCam.className = 'py-2 rounded-lg text-xs font-bold bg-blue-600 text-white transition flex items-center justify-center gap-1.5';
+                btnUsb.className = 'py-2 rounded-lg text-xs font-bold text-slate-400 hover:text-white transition flex items-center justify-center gap-1.5';
+                document.getElementById('area-camera').classList.remove('hidden');
+                document.getElementById('area-usb').classList.add('hidden');
+                startCamera();
+            } else {
+                btnUsb.className = 'py-2 rounded-lg text-xs font-bold bg-blue-600 text-white transition flex items-center justify-center gap-1.5';
+                btnCam.className = 'py-2 rounded-lg text-xs font-bold text-slate-400 hover:text-white transition flex items-center justify-center gap-1.5';
+                document.getElementById('area-camera').classList.add('hidden');
+                document.getElementById('area-usb').classList.remove('hidden');
+                await stopCamera();
+                input.focus();
+            }
+        }
+
+        input.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter' && input.value.trim()) {
+                const code = input.value.trim();
+                input.value = '';
+                submitScan(code);
+            }
+        });
+
+        // 5. Kirim Data Scan ke Server
+        let resetTimer = null;
+        let scanCount = 0;
+
+        async function submitScan(code) {
+            isProcessingScan = true;
+            try {
+                const res = await fetch('/api/scan', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ code, scanner_id: currentPos })
+                });
+                const data = await res.json();
+                showScanResult(data);
+            } catch (err) {
+                showScanResult({ success: false, error: 'Koneksi ke server terputus' });
+            } finally {
+                setTimeout(() => { isProcessingScan = false; }, 1000);
+            }
+        }
+
+        function showScanResult(data) {
+            const standby = document.getElementById('standby-card');
+            const card = document.getElementById('result-card');
+            standby.classList.add('hidden');
+            card.classList.remove('hidden', 'bg-emerald-600', 'border-emerald-400', 'bg-amber-600', 'border-amber-400', 'bg-rose-600', 'border-rose-400');
+            void card.offsetWidth;
+
+            if (data.success) {
+                playBeep('success');
+                const isHadir = data.data.status === 'Hadir';
+                card.classList.add(isHadir ? 'bg-emerald-600' : 'bg-amber-600', isHadir ? 'border-emerald-400' : 'border-amber-400');
+                document.getElementById('res-icon').innerHTML = isHadir ? '<i class="fa-solid fa-check"></i>' : '<i class="fa-solid fa-clock"></i>';
+                document.getElementById('res-badge').innerText = data.data.status;
+                document.getElementById('res-nama').innerText = data.data.nama_siswa;
+                document.getElementById('res-kelas').innerText = `${data.data.kelas} • ${data.data.jurusan}`;
+                document.getElementById('res-waktu').innerHTML = `<i class="fa-regular fa-clock mr-1"></i>${data.data.waktu}`;
+                document.getElementById('res-wa-info').innerHTML = `<i class="fa-brands fa-whatsapp mr-1"></i>WA Terkirim`;
+                addRecentItem(data.data);
+            } else {
+                playBeep('error');
+                card.classList.add('bg-rose-600', 'border-rose-400');
+                document.getElementById('res-icon').innerHTML = '<i class="fa-solid fa-triangle-exclamation"></i>';
+                document.getElementById('res-badge').innerText = 'GAGAL';
+                document.getElementById('res-nama').innerText = data.error || 'QR Tidak Valid';
+                document.getElementById('res-kelas').innerText = 'Coba pindai ulang kartu siswa';
+                document.getElementById('res-waktu').innerHTML = new Date().toLocaleTimeString('id-ID');
+                document.getElementById('res-wa-info').innerHTML = '';
+            }
+
+            clearTimeout(resetTimer);
+            resetTimer = setTimeout(() => {
+                card.classList.add('hidden');
+                standby.classList.remove('hidden');
+            }, 3500);
+        }
+
+        function addRecentItem(item) {
+            const empty = document.getElementById('empty-recent');
+            if (empty) empty.remove();
+            scanCount++;
+            document.getElementById('pos-counter').innerText = `${scanCount} siswa`;
+
+            const list = document.getElementById('recent-list');
+            const color = item.status === 'Hadir' ? 'text-emerald-400' : 'text-amber-400';
+            const li = document.createElement('li');
+            li.className = 'px-4 py-2 flex justify-between items-center animate-pop';
+            li.innerHTML = `
+                <div><span class="font-bold text-slate-200">${item.nama_siswa}</span> <span class="text-slate-500">(${item.kelas})</span></div>
+                <div class="font-mono"><span class="${color} font-semibold mr-1.5">${item.status}</span><span class="text-slate-500">${item.waktu}</span></div>
+            `;
+            list.prepend(li);
+            if (list.children.length > 5) list.lastElementChild.remove();
+        }
+
+        // Jalankan kamera otomatis saat halaman dibuka
+        window.addEventListener('load', () => startCamera());
+    </script>
+</body>
+</html>
