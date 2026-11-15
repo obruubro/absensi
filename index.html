@@ -51,8 +51,9 @@
                 </button>
             </div>
 
-            <div id="status-box" class="bg-slate-900/70 border border-slate-700 rounded-2xl p-3.5 text-center space-y-1">
-                <p class="text-xs text-slate-400"><i class="fa-solid fa-spinner fa-spin text-blue-400 mr-1"></i> Menghubungkan ke server...</p>
+            <!-- Kotak Status Server -->
+            <div id="status-box" class="bg-slate-900/70 border border-slate-700 rounded-2xl p-4 text-center space-y-1.5">
+                <p class="text-xs text-slate-400"><i class="fa-solid fa-spinner fa-spin text-blue-400 mr-1"></i> Memeriksa koneksi PC Server sekolah...</p>
             </div>
 
             <div id="menu-links" class="hidden space-y-3">
@@ -81,7 +82,7 @@
             </div>
 
             <button onclick="muatPortal()" class="w-full py-2.5 bg-slate-700 hover:bg-slate-600 rounded-xl text-xs font-semibold text-slate-300 transition">
-                <i class="fa-solid fa-rotate mr-1"></i> Segarkan Koneksi Server
+                <i class="fa-solid fa-rotate mr-1"></i> Cek Ulang Status Server
             </button>
         </div>
     </div>
@@ -122,12 +123,9 @@
                 const users = await res.json();
 
                 if (!users || users.length === 0) {
-                    btn.disabled = false;
-                    btn.innerHTML = 'Masuk ke Portal <i class="fa-solid fa-right-to-bracket ml-1"></i>';
                     return tampilError('Username atau password salah!');
                 }
 
-                // Simpan sesi dan token kredensial di browser perangkat ini
                 localStorage.setItem('portal_user', JSON.stringify({
                     username: users[0].username,
                     password: password,
@@ -150,6 +148,41 @@
             document.getElementById('login-section').classList.remove('hidden');
         }
 
+        // Fungsi untuk menguji apakah server & tunnel Cloudflare benar-benar merespons (online)
+        async function cekServerOnline(baseUrl) {
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => controller.abort(), 5000);
+            try {
+                await fetch(`${baseUrl}/login.html`, {
+                    mode: 'no-cors',
+                    cache: 'no-store',
+                    signal: controller.signal
+                });
+                clearTimeout(timeoutId);
+                return true;
+            } catch (e) {
+                clearTimeout(timeoutId);
+                return false;
+            }
+        }
+
+        function tampilkanPesanServerMati(statusBox, menuLinks) {
+            menuLinks.classList.add('hidden');
+            statusBox.className = 'bg-rose-950/50 border border-rose-500/40 rounded-2xl p-4 text-center space-y-2';
+            statusBox.innerHTML = `
+                <div class="w-10 h-10 bg-rose-500/20 text-rose-400 rounded-full mx-auto flex items-center justify-center text-lg">
+                    <i class="fa-solid fa-plug-circle-xmark"></i>
+                </div>
+                <p class="text-sm font-bold text-rose-300">Server Sekolah Belum Aktif</p>
+                <p class="text-xs text-slate-300 leading-relaxed">
+                    PC Server di Lab belum dinyalakan atau aplikasi absensi belum berjalan.
+                </p>
+                <p class="text-[11px] text-slate-400 pt-1">
+                    Nyalakan PC Server dan jalankan <b>MULAI-ABSENSI.bat</b>, lalu klik tombol <i>Cek Ulang Status Server</i> di bawah.
+                </p>
+            `;
+        }
+
         async function muatPortal() {
             const rawUser = localStorage.getItem('portal_user');
             if (!rawUser) return;
@@ -162,8 +195,11 @@
             const statusBox = document.getElementById('status-box');
             const menuLinks = document.getElementById('menu-links');
 
+            statusBox.className = 'bg-slate-900/70 border border-slate-700 rounded-2xl p-4 text-center space-y-1';
+            statusBox.innerHTML = `<p class="text-xs text-slate-400"><i class="fa-solid fa-spinner fa-spin text-blue-400 mr-1"></i> Memeriksa status PC Server sekolah...</p>`;
+            menuLinks.classList.add('hidden');
+
             try {
-                // Verifikasi ulang akun & ambil url_publik sekaligus
                 const [resUser, resCfg] = await Promise.all([
                     fetch(`${SUPABASE_URL}/rest/v1/users?username=eq.${encodeURIComponent(user.username)}&password=eq.${encodeURIComponent(user.password)}&select=id`, { cache: 'no-store', headers }),
                     fetch(`${SUPABASE_URL}/rest/v1/pengaturan?id=eq.1&select=url_publik`, { cache: 'no-store', headers })
@@ -178,17 +214,24 @@
                 const cfgRows = await resCfg.json();
                 const cfg = cfgRows[0];
 
+                // 1. Jika URL belum pernah tersimpan di database
                 if (!cfg || !cfg.url_publik) {
-                    statusBox.innerHTML = `<p class="text-xs text-amber-400 font-semibold">Server sekolah belum dinyalakan hari ini.</p>`;
-                    menuLinks.classList.add('hidden');
-                    return;
+                    return tampilkanPesanServerMati(statusBox, menuLinks);
                 }
 
                 const baseUrl = cfg.url_publik.replace(/\/$/, '');
-                // Buat token akses gabungan username:password (base64) untuk dibawa ke halaman scanner
+
+                // 2. Uji apakah server & tunnel Cloudflare benar-benar aktif saat ini
+                const isOnline = await cekServerOnline(baseUrl);
+                if (!isOnline) {
+                    return tampilkanPesanServerMati(statusBox, menuLinks);
+                }
+
+                // Server aktif dan merespons
                 const authToken = encodeURIComponent(btoa(`${user.username}:${user.password}`));
 
-                statusBox.innerHTML = `<p class="text-[11px] text-emerald-400 font-bold"><i class="fa-solid fa-server mr-1"></i> Server Sekolah Aktif</p>`;
+                statusBox.className = 'bg-emerald-950/40 border border-emerald-500/30 rounded-2xl p-3.5 text-center space-y-0.5';
+                statusBox.innerHTML = `<p class="text-xs text-emerald-400 font-bold"><i class="fa-solid fa-circle-check mr-1"></i> Server Sekolah Aktif & Siap Digunakan</p>`;
 
                 document.getElementById('btn-dashboard').href = `${baseUrl}/login.html`;
                 document.getElementById('btn-pos1').href = `${baseUrl}/scan.html?pos=POS-1&token=${authToken}`;
@@ -206,7 +249,7 @@
 
                 menuLinks.classList.remove('hidden');
             } catch (err) {
-                statusBox.innerHTML = `<p class="text-xs text-rose-400 font-semibold">Error: ${err.message}</p>`;
+                tampilkanPesanServerMati(statusBox, menuLinks);
             }
         }
 
