@@ -7,119 +7,106 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
 </head>
-<body class="bg-slate-950 text-white min-h-screen flex items-center justify-center p-4 font-sans relative overflow-x-hidden selection:bg-blue-500/30 selection:text-blue-200">
+<body class="bg-slate-50 text-slate-800 min-h-screen flex items-center justify-center p-4 font-sans selection:bg-blue-100 selection:text-blue-900">
 
-    <!-- Efek Cahaya Latar Belakang (Ambient Glow) -->
-    <div class="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[28rem] h-[28rem] bg-blue-600/15 rounded-full blur-3xl pointer-events-none"></div>
+    <!-- Kartu Utama (Selaras dengan Tema Terang Dashboard) -->
+    <div class="w-full max-w-md bg-white border border-slate-200 rounded-2xl p-6 sm:p-8 shadow-lg space-y-6">
 
-    <!-- Kartu Utama -->
-    <div class="relative w-full max-w-md bg-slate-900/85 backdrop-blur-xl border border-slate-700/70 rounded-3xl p-6 sm:p-8 shadow-[0_20px_50px_rgba(0,0,0,0.6)] space-y-6 overflow-hidden">
-        
-        <!-- Garis Cahaya Tipis di Puncak Kartu -->
-        <div class="absolute top-0 inset-x-0 h-px bg-gradient-to-r from-transparent via-blue-400/60 to-transparent"></div>
-
-        <!-- HEADER / LOGO TIPOGRAFI (Tanpa Kotak Ikon) -->
-        <div class="text-center space-y-2.5 pt-1">
-            <span class="inline-flex items-center gap-2 px-3.5 py-1 text-[10px] font-bold tracking-[0.2em] uppercase text-blue-400">
-                <span class="w-1.5 h-1.5 rounded-full bg-green-400 animate-pulse"></span>
+        <!-- HEADER / LOGO TIPOGRAFI -->
+        <div class="text-center space-y-2 pb-4 border-b border-slate-100">
+            <span class="inline-flex items-center gap-2 px-3 py-1 text-[11px] font-semibold tracking-wider uppercase text-blue-700 bg-blue-50 border border-blue-100 rounded-full">
+                <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
                 Absensi Siswa
             </span>
 
-            <div class="space-y-1">
-                <h1 class="text-2xl sm:text-[26px] font-black tracking-tight text-white">
-                    SMKN <span class="bg-gradient-to-r from-blue-400 to-cyan-300 bg-clip-text text-transparent">KASOMALANG</span>
+            <div class="space-y-1 pt-1">
+                <h1 class="text-2xl font-extrabold tracking-tight text-slate-900">
+                    SMKN <span class="text-blue-600">KASOMALANG</span>
                 </h1>
-                <div class="flex items-center justify-center gap-2 text-xs font-medium text-slate-400">
-                    <span class="h-px w-4 bg-slate-700"></span>
+                <div class="flex items-center justify-center gap-2 text-xs font-medium text-slate-500">
+                    <span class="h-px w-4 bg-slate-200"></span>
                     <span>Portal Petugas</span>
-                    <span class="h-px w-4 bg-slate-700"></span>
+                    <span class="h-px w-4 bg-slate-200"></span>
                 </div>
             </div>
         </div>
 
         <!-- PANEL 1: FORM LOGIN TUNGGAL -->
         <div id="login-section" class="space-y-4">
-            <form onsubmit="prosesLogin(event)" class="space-y-4">
+            <form onsubmit="prosesLogin(event)" class="space-y-3.5">
                 <div>
                     <div class="relative">
-                        <i class="fa-solid fa-user text-xs text-slate-500 absolute left-3.5 top-1/2 -translate-y-1/2"></i>
+                        <i class="fa-solid fa-user text-xs text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2"></i>
                         <input type="text" id="input-user" required placeholder="Masukkan username"
-                            class="w-full pl-10 pr-4 py-3 bg-slate-950/70 border border-slate-700/80 rounded-xl text-sm text-white placeholder-slate-500 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition">
+                            class="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm text-slate-800 placeholder-slate-400 focus:bg-white focus:outline-none focus:border-blue-600 focus:ring-2 focus:ring-blue-600/10 transition">
                     </div>
                 </div>
                 <div>
                     <div class="relative">
-                        <i class="fa-solid fa-lock text-xs text-slate-500 absolute left-3.5 top-1/2 -translate-y-1/2"></i>
-                        <input type="password" id="input-pass" required placeholder="Masukan Password"
-                            class="w-full pl-10 pr-4 py-3 bg-slate-950/70 border border-slate-700/80 rounded-xl text-sm text-white placeholder-slate-500 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition">
+                        <i class="fa-solid fa-lock text-xs text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2"></i>
+                        <input type="password" id="input-pass" required placeholder="Masukkan password"
+                            class="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm text-slate-800 placeholder-slate-400 focus:bg-white focus:outline-none focus:border-blue-600 focus:ring-2 focus:ring-blue-600/10 transition">
                     </div>
                 </div>
                 <button type="submit" id="btn-submit"
-                    class="w-full py-3.5 bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-500 hover:to-blue-400 rounded-xl font-bold text-sm text-white transition-all duration-200 shadow-lg shadow-blue-600/25 active:scale-[0.98] cursor-pointer">
-                    Masuk ke Portal <i class="fa-solid fa-right-to-bracket ml-1.5"></i>
+                    class="w-full py-3 bg-blue-600 hover:bg-blue-700 rounded-xl font-semibold text-sm text-white transition shadow-sm active:scale-[0.99] cursor-pointer">
+                    Masuk
                 </button>
             </form>
 
-            <p id="login-error" class="text-xs text-center text-rose-400 font-semibold hidden"></p>
+            <div id="login-error" class="hidden p-3 rounded-xl bg-rose-50 border border-rose-200 text-xs text-center text-rose-600 font-medium"></div>
         </div>
 
-        <!-- PANEL 2: MENU DIRECT LINK (Tampil setelah login berhasil) -->
+        <!-- PANEL 2: MENU SCANNER POS (Tampil setelah login berhasil) -->
         <div id="portal-section" class="hidden space-y-4">
-            <div class="flex items-center justify-between bg-slate-950/60 border border-slate-700/80 px-4 py-2.5 rounded-xl">
-                <span id="user-badge" class="text-xs font-semibold text-emerald-400">
-                    <i class="fa-solid fa-circle-check mr-1.5"></i> Terverifikasi
+            <div class="flex items-center justify-between bg-slate-50 border border-slate-200 px-4 py-2.5 rounded-xl">
+                <span id="user-badge" class="text-xs font-semibold text-emerald-700">
+                    <i class="fa-solid fa-circle-check text-emerald-600 mr-1.5"></i> Terverifikasi
                 </span>
-                <button onclick="logoutPortal()" class="text-[11px] text-rose-400 hover:text-rose-300 hover:underline font-semibold transition cursor-pointer">
+                <button onclick="logoutPortal()" class="text-[11px] text-rose-600 hover:text-rose-700 hover:underline font-semibold transition cursor-pointer">
                     <i class="fa-solid fa-power-off mr-1"></i> Keluar
                 </button>
             </div>
 
             <!-- Kotak Status Server -->
-            <div id="status-box" class="bg-slate-950/60 border border-slate-700/80 rounded-2xl p-4 text-center space-y-1.5">
-                <p class="text-xs text-slate-400">
-                    <i class="fa-solid fa-spinner fa-spin text-blue-400 mr-1.5"></i> Memeriksa koneksi PC Server sekolah...
+            <div id="status-box" class="bg-slate-50 border border-slate-200 rounded-2xl p-4 text-center space-y-1.5">
+                <p class="text-xs text-slate-500">
+                    <i class="fa-solid fa-spinner fa-spin text-blue-600 mr-1.5"></i> Memeriksa koneksi PC Server sekolah...
                 </p>
             </div>
 
-            <div id="menu-links" class="hidden space-y-3.5">
-                <a id="btn-dashboard" href="#"
-                    class="group flex items-center justify-between w-full p-4 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 rounded-2xl font-bold text-sm transition-all duration-200 shadow-lg shadow-blue-600/25">
-                    <span class="flex items-center gap-3">
-                        <i class="fa-solid fa-gauge-high text-lg"></i> Masuk Dashboard Admin / Piket
-                    </span>
-                    <i class="fa-solid fa-arrow-right group-hover:translate-x-1 transition-transform"></i>
-                </a>
-
-                <div class="pt-1">
-                    <p class="text-[11px] uppercase tracking-wider text-slate-400 font-semibold mb-2.5 px-1">Pilih Pos Kamera Scanner</p>
-                    <div class="grid grid-cols-2 gap-2.5">
-                        <a id="btn-pos1" href="#" class="group p-3.5 bg-emerald-500/10 hover:bg-emerald-600 border border-emerald-500/30 hover:border-emerald-400 rounded-xl text-center text-xs font-bold text-emerald-300 hover:text-white transition-all duration-200">
-                            <i class="fa-solid fa-camera block text-base mb-1.5 group-hover:scale-110 transition-transform"></i> Scanner POS 1
-                        </a>
-                        <a id="btn-pos2" href="#" class="group p-3.5 bg-emerald-500/10 hover:bg-emerald-600 border border-emerald-500/30 hover:border-emerald-400 rounded-xl text-center text-xs font-bold text-emerald-300 hover:text-white transition-all duration-200">
-                            <i class="fa-solid fa-camera block text-base mb-1.5 group-hover:scale-110 transition-transform"></i> Scanner POS 2
-                        </a>
-                        <a id="btn-pos3" href="#" class="group p-3.5 bg-emerald-500/10 hover:bg-emerald-600 border border-emerald-500/30 hover:border-emerald-400 rounded-xl text-center text-xs font-bold text-emerald-300 hover:text-white transition-all duration-200">
-                            <i class="fa-solid fa-camera block text-base mb-1.5 group-hover:scale-110 transition-transform"></i> Scanner POS 3
-                        </a>
-                        <a id="btn-pos4" href="#" class="group p-3.5 bg-emerald-500/10 hover:bg-emerald-600 border border-emerald-500/30 hover:border-emerald-400 rounded-xl text-center text-xs font-bold text-emerald-300 hover:text-white transition-all duration-200">
-                            <i class="fa-solid fa-camera block text-base mb-1.5 group-hover:scale-110 transition-transform"></i> Scanner POS 4
-                        </a>
-                    </div>
+            <!-- Pilihan Pos Kamera Scanner -->
+            <div id="menu-links" class="hidden space-y-2.5">
+                <p class="text-[11px] uppercase tracking-wider text-slate-500 font-semibold px-1">Pilih Pos Kamera Scanner</p>
+                <div class="grid grid-cols-2 gap-2.5">
+                    <a id="btn-pos1" href="#" class="group p-3.5 bg-emerald-50 hover:bg-emerald-600 border border-emerald-200 hover:border-emerald-600 rounded-xl text-center text-xs font-bold text-emerald-700 hover:text-white transition">
+                        <i class="fa-solid fa-camera block text-base mb-1.5 group-hover:scale-110 transition-transform"></i> Scanner POS 1
+                    </a>
+                    <a id="btn-pos2" href="#" class="group p-3.5 bg-emerald-50 hover:bg-emerald-600 border border-emerald-200 hover:border-emerald-600 rounded-xl text-center text-xs font-bold text-emerald-700 hover:text-white transition">
+                        <i class="fa-solid fa-camera block text-base mb-1.5 group-hover:scale-110 transition-transform"></i> Scanner POS 2
+                    </a>
+                    <a id="btn-pos3" href="#" class="group p-3.5 bg-emerald-50 hover:bg-emerald-600 border border-emerald-200 hover:border-emerald-600 rounded-xl text-center text-xs font-bold text-emerald-700 hover:text-white transition">
+                        <i class="fa-solid fa-camera block text-base mb-1.5 group-hover:scale-110 transition-transform"></i> Scanner POS 3
+                    </a>
+                    <a id="btn-pos4" href="#" class="group p-3.5 bg-emerald-50 hover:bg-emerald-600 border border-emerald-200 hover:border-emerald-600 rounded-xl text-center text-xs font-bold text-emerald-700 hover:text-white transition">
+                        <i class="fa-solid fa-camera block text-base mb-1.5 group-hover:scale-110 transition-transform"></i> Scanner POS 4
+                    </a>
                 </div>
             </div>
 
-            <button onclick="muatPortal()" class="w-full py-2.5 bg-slate-800 hover:bg-slate-700 border border-slate-700 rounded-xl text-xs font-semibold text-slate-300 transition cursor-pointer">
+            <button onclick="muatPortal()" class="w-full py-2.5 bg-slate-100 hover:bg-slate-200 border border-slate-200 rounded-xl text-xs font-semibold text-slate-700 transition cursor-pointer">
                 <i class="fa-solid fa-rotate mr-1.5"></i> Cek Ulang Status Server
             </button>
         </div>
 
-        <!-- FOOTER (Sudah Disesuaikan untuk Tema Gelap) -->
-        <footer class="w-full pt-4 border-t border-slate-700/60 text-center">
+        <!-- FOOTER DENGAN DIRECT LINK TERSEMBUNYI KE DASHBOARD ADMIN -->
+        <footer class="w-full pt-4 border-t border-slate-100 text-center">
             <p class="text-[11px] text-slate-400">
-                &copy; 2026 Sistem Absensi <b class="font-semibold text-slate-300">SMKN Kasomalang</b>
-                <span class="mx-1.5 text-slate-600">&bull;</span>
-                <span class="font-mono text-slate-600">//</span><span class="font-semibold text-slate-600">ngapel</span>
+                &copy; 2026 Sistem Absensi <b class="font-semibold text-slate-600">SMKN Kasomalang</b>
+                <span class="mx-1.5 text-slate-300">&bull;</span>
+                <a id="secret-admin-link" href="#" onclick="return bukaDashboardTersembunyi(event)" title="Akses Dashboard Admin"
+                   class="text-slate-400 hover:text-slate-500 transition cursor-default"><span class="font-semibold">Pengembang</span>
+                </a>
             </p>
         </footer>
 
@@ -135,10 +122,22 @@
             'Content-Type': 'application/json'
         };
 
+        let activeDashboardUrl = '';
+
         function tampilError(msg) {
             const el = document.getElementById('login-error');
             el.textContent = msg;
             el.classList.remove('hidden');
+        }
+
+        function bukaDashboardTersembunyi(e) {
+            // Hanya bisa dibuka jika user sudah login di portal & server sedang aktif
+            if (!activeDashboardUrl) {
+                e.preventDefault();
+                return false;
+            }
+            window.location.href = activeDashboardUrl;
+            return false;
         }
 
         async function prosesLogin(e) {
@@ -176,17 +175,17 @@
                 tampilError('Gagal terhubung ke database: ' + err.message);
             } finally {
                 btn.disabled = false;
-                btn.innerHTML = 'Masuk ke Portal <i class="fa-solid fa-right-to-bracket ml-1"></i>';
+                btn.innerHTML = 'Masuk ke Portal <i class="fa-solid fa-right-to-bracket ml-1.5"></i>';
             }
         }
 
         function logoutPortal() {
+            activeDashboardUrl = '';
             localStorage.removeItem('portal_user');
             document.getElementById('portal-section').classList.add('hidden');
             document.getElementById('login-section').classList.remove('hidden');
         }
 
-        // Fungsi untuk menguji apakah server & tunnel Cloudflare benar-benar merespons (online)
         async function cekServerOnline(baseUrl) {
             const controller = new AbortController();
             const timeoutId = setTimeout(() => controller.abort(), 5000);
@@ -205,21 +204,22 @@
         }
 
         function tampilkanPesanServerMati(statusBox, menuLinks) {
+            activeDashboardUrl = '';
             menuLinks.classList.add('hidden');
-            statusBox.className = 'bg-rose-950/50 border border-rose-500/40 rounded-2xl p-4 text-center space-y-2';
+            statusBox.className = 'bg-rose-50 border border-rose-200 rounded-2xl p-4 text-center space-y-1.5';
             statusBox.innerHTML = `
-                <div class="w-10 h-10 bg-rose-500/20 text-rose-400 rounded-full mx-auto flex items-center justify-center text-lg">
+                <div class="w-10 h-10 bg-rose-100 text-rose-600 rounded-full mx-auto flex items-center justify-center text-base">
                     <i class="fa-solid fa-plug-circle-xmark"></i>
                 </div>
-                <p class="text-sm font-bold text-rose-300">Server Sekolah Belum Aktif</p>
-                <p class="text-xs text-slate-300 leading-relaxed">
+                <p class="text-sm font-bold text-rose-700">Server Sekolah Belum Aktif</p>
+                <p class="text-xs text-slate-600 leading-relaxed">
                     Server di Lab belum dinyalakan atau aplikasi absensi belum berjalan.
                 </p>
-                <p class="text-[11px] text-slate-400 pt-1">
+                <p class="text-[11px] text-slate-500 pt-0.5">
                     Nyalakan terlebih dahulu server atau aplikasi absensi, lalu klik tombol <i>Cek Ulang Status Server</i> di bawah.
                 </p>
-                <p class="text-[10px] italic text-slate-400/80 pt-1">
-                    *Jika kendala masih berlanjut, harap hubungi operator .
+                <p class="text-[10px] italic text-slate-400 pt-1">
+                    *Jika kendala masih berlanjut, harap hubungi operator.
                 </p>
             `;
         }
@@ -231,13 +231,13 @@
             const user = JSON.parse(rawUser);
             document.getElementById('login-section').classList.add('hidden');
             document.getElementById('portal-section').classList.remove('hidden');
-            document.getElementById('user-badge').innerHTML = `<i class="fa-solid fa-circle-check mr-1"></i> ${user.nama}`;
+            document.getElementById('user-badge').innerHTML = `<i class="fa-solid fa-circle-check text-emerald-600 mr-1.5"></i> ${user.nama}`;
 
             const statusBox = document.getElementById('status-box');
             const menuLinks = document.getElementById('menu-links');
 
-            statusBox.className = 'bg-slate-900/70 border border-slate-700 rounded-2xl p-4 text-center space-y-1';
-            statusBox.innerHTML = `<p class="text-xs text-slate-400"><i class="fa-solid fa-spinner fa-spin text-blue-400 mr-1"></i> Memeriksa status PC Server sekolah...</p>`;
+            statusBox.className = 'bg-slate-50 border border-slate-200 rounded-2xl p-4 text-center space-y-1';
+            statusBox.innerHTML = `<p class="text-xs text-slate-500"><i class="fa-solid fa-spinner fa-spin text-blue-600 mr-1.5"></i> Memeriksa status PC Server sekolah...</p>`;
             menuLinks.classList.add('hidden');
 
             try {
@@ -255,26 +255,25 @@
                 const cfgRows = await resCfg.json();
                 const cfg = cfgRows[0];
 
-                // 1. Jika URL belum pernah tersimpan di database
                 if (!cfg || !cfg.url_publik) {
                     return tampilkanPesanServerMati(statusBox, menuLinks);
                 }
 
                 const baseUrl = cfg.url_publik.replace(/\/$/, '');
-
-                // 2. Uji apakah server & tunnel Cloudflare benar-benar aktif saat ini
                 const isOnline = await cekServerOnline(baseUrl);
                 if (!isOnline) {
                     return tampilkanPesanServerMati(statusBox, menuLinks);
                 }
 
-                // Server aktif dan merespons
+                // Server aktif -> simpan URL Dashboard ke tautan tersembunyi di footer
+                activeDashboardUrl = `${baseUrl}/login.html`;
+                document.getElementById('secret-admin-link').href = activeDashboardUrl;
+
                 const authToken = encodeURIComponent(btoa(`${user.username}:${user.password}`));
 
-                statusBox.className = 'bg-emerald-950/40 border border-emerald-500/30 rounded-2xl p-3.5 text-center space-y-0.5';
-                statusBox.innerHTML = `<p class="text-xs text-emerald-400 font-bold"><i class="fa-solid fa-circle-check mr-1"></i> Server Sekolah Aktif & Siap Digunakan</p>`;
+                statusBox.className = 'bg-emerald-50 border border-emerald-200 rounded-2xl p-3.5 text-center';
+                statusBox.innerHTML = `<p class="text-xs text-emerald-700 font-bold"><i class="fa-solid fa-circle-check text-emerald-600 mr-1.5"></i> Server Sekolah Aktif & Siap Digunakan</p>`;
 
-                document.getElementById('btn-dashboard').href = `${baseUrl}/login.html`;
                 document.getElementById('btn-pos1').href = `${baseUrl}/scan.html?pos=POS-1&token=${authToken}`;
                 document.getElementById('btn-pos2').href = `${baseUrl}/scan.html?pos=POS-2&token=${authToken}`;
                 document.getElementById('btn-pos3').href = `${baseUrl}/scan.html?pos=POS-3&token=${authToken}`;
@@ -282,7 +281,7 @@
 
                 const params = new URLSearchParams(window.location.search);
                 const autoTarget = params.get('auto');
-                if (autoTarget === 'dashboard') window.location.replace(`${baseUrl}/login.html`);
+                if (autoTarget === 'dashboard') window.location.replace(activeDashboardUrl);
                 if (autoTarget === 'pos1') window.location.replace(`${baseUrl}/scan.html?pos=POS-1&token=${authToken}`);
                 if (autoTarget === 'pos2') window.location.replace(`${baseUrl}/scan.html?pos=POS-2&token=${authToken}`);
                 if (autoTarget === 'pos3') window.location.replace(`${baseUrl}/scan.html?pos=POS-3&token=${authToken}`);
