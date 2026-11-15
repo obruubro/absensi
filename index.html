@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Portal Absensi QR - SMKN Kasomalang</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
 </head>
 <body class="bg-slate-900 text-white min-h-screen flex items-center justify-center p-4 font-sans">
@@ -59,51 +58,65 @@
     </div>
 
     <script>
-        // GANTI DENGAN DATA DARI SUPABASE (Project Settings -> API)
-        const SUPABASE_URL = 'postgresql://postgres.welaqxdegjvdxukjtmru:Tajamaaftam21@aws-0-ap-southeast-2.pooler.supabase.com:5432/postgres';
-        const SUPABASE_ANON_KEY = 'sb_publishable_5Qi53DDHpMXan5aR-8xItw_YQsfLqAa';
-
-        const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        const SUPABASE_URL = 'https://welaqxdegjvdxukjtmru.supabase.co';
+        const SUPABASE_KEY = 'sb_publishable_5Qi53DDHpMXan5aR-8xItw_YQsfLqAa';
 
         async function ambilLinkTerbaru() {
             const statusBox = document.getElementById('status-box');
             const menuLinks = document.getElementById('menu-links');
 
-            const { data, error } = await supabaseClient
-                .from('pengaturan')
-                .select('url_publik')
-                .eq('id', 1)
-                .single();
+            statusBox.innerHTML = `<p class="text-xs text-slate-400 flex items-center justify-center gap-2"><i class="fa-solid fa-spinner fa-spin text-blue-400"></i> Menghubungi database...</p>`;
 
-            if (error || !data || !data.url_publik) {
-                statusBox.innerHTML = `<p class="text-xs text-rose-400 font-semibold"><i class="fa-solid fa-circle-exclamation mr-1"></i> Server sekolah belum aktif atau link belum tersedia.</p>`;
+            try {
+                // Ambil langsung via REST API Supabase tanpa cache
+                const response = await fetch(`${SUPABASE_URL}/rest/v1/pengaturan?id=eq.1&select=url_publik`, {
+                    method: 'GET',
+                    cache: 'no-store',
+                    headers: {
+                        'apikey': SUPABASE_KEY,
+                        'Authorization': `Bearer ${SUPABASE_KEY}`,
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                if (!response.ok) {
+                    const errText = await response.text();
+                    throw new Error(`HTTP ${response.status}: ${errText}`);
+                }
+
+                const rows = await response.json();
+                if (!rows || rows.length === 0 || !rows[0].url_publik) {
+                    statusBox.innerHTML = `<p class="text-xs text-amber-400 font-semibold"><i class="fa-solid fa-triangle-exclamation mr-1"></i> Kolom url_publik masih kosong di database. Pastikan server.js sudah menampilkan "Link berhasil disimpan ke Supabase!".</p>`;
+                    menuLinks.classList.add('hidden');
+                    return;
+                }
+
+                const baseUrl = rows[0].url_publik.replace(/\/$/, '');
+                statusBox.innerHTML = `
+                    <p class="text-[11px] text-emerald-400 font-bold"><i class="fa-solid fa-circle-check mr-1"></i> Server Aktif & Terhubung</p>
+                    <p class="text-[11px] text-slate-400 truncate font-mono">${baseUrl}</p>
+                `;
+
+                document.getElementById('btn-dashboard').href = `${baseUrl}/login.html`;
+                document.getElementById('btn-pos1').href = `${baseUrl}/scan.html?pos=POS-1`;
+                document.getElementById('btn-pos2').href = `${baseUrl}/scan.html?pos=POS-2`;
+                document.getElementById('btn-pos3').href = `${baseUrl}/scan.html?pos=POS-3`;
+                document.getElementById('btn-pos4').href = `${baseUrl}/scan.html?pos=POS-4`;
+
+                const params = new URLSearchParams(window.location.search);
+                const autoTarget = params.get('auto');
+                if (autoTarget === 'dashboard') window.location.replace(`${baseUrl}/login.html`);
+                if (autoTarget === 'pos1') window.location.replace(`${baseUrl}/scan.html?pos=POS-1`);
+                if (autoTarget === 'pos2') window.location.replace(`${baseUrl}/scan.html?pos=POS-2`);
+                if (autoTarget === 'pos3') window.location.replace(`${baseUrl}/scan.html?pos=POS-3`);
+                if (autoTarget === 'pos4') window.location.replace(`${baseUrl}/scan.html?pos=POS-4`);
+
+                menuLinks.classList.remove('hidden');
+            } catch (err) {
+                console.error(err);
+                statusBox.innerHTML = `<p class="text-xs text-rose-400 font-semibold break-words"><i class="fa-solid fa-circle-xmark mr-1"></i> Gagal memuat: ${err.message}</p>`;
                 menuLinks.classList.add('hidden');
-                return;
             }
-
-            const baseUrl = data.url_publik.replace(/\/$/, '');
-            statusBox.innerHTML = `
-                <p class="text-[11px] text-emerald-400 font-bold"><i class="fa-solid fa-circle-check mr-1"></i> Server Aktif & Terhubung</p>
-                <p class="text-[11px] text-slate-400 truncate font-mono">${baseUrl}</p>
-            `;
-
-            // Pasang direct link ke semua tombol
-            document.getElementById('btn-dashboard').href = `${baseUrl}/login.html`;
-            document.getElementById('btn-pos1').href = `${baseUrl}/scan.html?pos=POS-1`;
-            document.getElementById('btn-pos2').href = `${baseUrl}/scan.html?pos=POS-2`;
-            document.getElementById('btn-pos3').href = `${baseUrl}/scan.html?pos=POS-3`;
-            document.getElementById('btn-pos4').href = `${baseUrl}/scan.html?pos=POS-4`;
-
-            // Jika URL dibuka dengan parameter ?auto=dashboard atau ?auto=pos1, langsung redirect otomatis!
-            const params = new URLSearchParams(window.location.search);
-            const autoTarget = params.get('auto');
-            if (autoTarget === 'dashboard') window.location.replace(`${baseUrl}/login.html`);
-            if (autoTarget === 'pos1') window.location.replace(`${baseUrl}/scan.html?pos=POS-1`);
-            if (autoTarget === 'pos2') window.location.replace(`${baseUrl}/scan.html?pos=POS-2`);
-            if (autoTarget === 'pos3') window.location.replace(`${baseUrl}/scan.html?pos=POS-3`);
-            if (autoTarget === 'pos4') window.location.replace(`${baseUrl}/scan.html?pos=POS-4`);
-
-            menuLinks.classList.remove('hidden');
         }
 
         ambilLinkTerbaru();
