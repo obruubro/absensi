@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Portal Absensi QR - SMKN Kasomalang</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
+</head>
+<body class="bg-slate-900 text-white min-h-screen flex items-center justify-center p-4 font-sans">
+
+    <div class="w-full max-w-md bg-slate-800 border border-slate-700 rounded-3xl p-6 sm:p-8 shadow-2xl space-y-6">
+        <!-- Header -->
+        <div class="text-center space-y-2">
+            <div class="w-14 h-14 bg-blue-600 rounded-2xl mx-auto flex items-center justify-center text-2xl shadow-lg shadow-blue-600/30">
+                <i class="fa-solid fa-qrcode"></i>
+            </div>
+            <h1 class="text-xl font-bold tracking-wide">E-ABSENSI QR</h1>
+            <p class="text-xs text-slate-400">SMKN Kasomalang • Portal Akses Cepat</p>
+        </div>
+
+        <!-- Status Koneksi -->
+        <div id="status-box" class="bg-slate-900/70 border border-slate-700 rounded-2xl p-4 text-center space-y-1">
+            <p class="text-xs text-slate-400 flex items-center justify-center gap-2">
+                <i class="fa-solid fa-spinner fa-spin text-blue-400"></i> Mengambil link server aktif...
+            </p>
+        </div>
+
+        <!-- Daftar Tombol Direct Link -->
+        <div id="menu-links" class="hidden space-y-3">
+            <a id="btn-dashboard" href="#" class="flex items-center justify-between w-full p-4 bg-blue-600 hover:bg-blue-500 rounded-2xl font-bold text-sm transition shadow-lg shadow-blue-600/20">
+                <span class="flex items-center gap-3"><i class="fa-solid fa-gauge-high text-lg"></i> Masuk Dashboard Admin / Piket</span>
+                <i class="fa-solid fa-arrow-right"></i>
+            </a>
+
+            <div class="pt-2">
+                <p class="text-[11px] uppercase tracking-wider text-slate-400 font-semibold mb-2 px-1">Buka Kamera Scanner HP</p>
+                <div class="grid grid-cols-2 gap-2.5">
+                    <a id="btn-pos1" href="#" class="p-3.5 bg-emerald-600/20 hover:bg-emerald-600 border border-emerald-500/40 rounded-xl text-center text-xs font-bold text-emerald-300 hover:text-white transition">
+                        <i class="fa-solid fa-camera block text-base mb-1"></i> Scanner POS 1
+                    </a>
+                    <a id="btn-pos2" href="#" class="p-3.5 bg-emerald-600/20 hover:bg-emerald-600 border border-emerald-500/40 rounded-xl text-center text-xs font-bold text-emerald-300 hover:text-white transition">
+                        <i class="fa-solid fa-camera block text-base mb-1"></i> Scanner POS 2
+                    </a>
+                    <a id="btn-pos3" href="#" class="p-3.5 bg-emerald-600/20 hover:bg-emerald-600 border border-emerald-500/40 rounded-xl text-center text-xs font-bold text-emerald-300 hover:text-white transition">
+                        <i class="fa-solid fa-camera block text-base mb-1"></i> Scanner POS 3
+                    </a>
+                    <a id="btn-pos4" href="#" class="p-3.5 bg-emerald-600/20 hover:bg-emerald-600 border border-emerald-500/40 rounded-xl text-center text-xs font-bold text-emerald-300 hover:text-white transition">
+                        <i class="fa-solid fa-camera block text-base mb-1"></i> Scanner POS 4
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <button onclick="ambilLinkTerbaru()" class="w-full py-2.5 bg-slate-700 hover:bg-slate-600 rounded-xl text-xs font-semibold text-slate-300 transition">
+            <i class="fa-solid fa-rotate mr-1"></i> Muat Ulang Link Server
+        </button>
+    </div>
+
+    <script>
+        // GANTI DENGAN DATA DARI SUPABASE (Project Settings -> API)
+        const SUPABASE_URL = 'https://welaqxdegjvdxukjtmru.supabase.co';
+        const SUPABASE_ANON_KEY = 'ISI_DENGAN_ANON_PUBLIC_KEY_SUPABASE_ANDA';
+
+        const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+        async function ambilLinkTerbaru() {
+            const statusBox = document.getElementById('status-box');
+            const menuLinks = document.getElementById('menu-links');
+
+            const { data, error } = await supabaseClient
+                .from('pengaturan')
+                .select('url_publik')
+                .eq('id', 1)
+                .single();
+
+            if (error || !data || !data.url_publik) {
+                statusBox.innerHTML = `<p class="text-xs text-rose-400 font-semibold"><i class="fa-solid fa-circle-exclamation mr-1"></i> Server sekolah belum aktif atau link belum tersedia.</p>`;
+                menuLinks.classList.add('hidden');
+                return;
+            }
+
+            const baseUrl = data.url_publik.replace(/\/$/, '');
+            statusBox.innerHTML = `
+                <p class="text-[11px] text-emerald-400 font-bold"><i class="fa-solid fa-circle-check mr-1"></i> Server Aktif & Terhubung</p>
+                <p class="text-[11px] text-slate-400 truncate font-mono">${baseUrl}</p>
+            `;
+
+            // Pasang direct link ke semua tombol
+            document.getElementById('btn-dashboard').href = `${baseUrl}/login.html`;
+            document.getElementById('btn-pos1').href = `${baseUrl}/scan.html?pos=POS-1`;
+            document.getElementById('btn-pos2').href = `${baseUrl}/scan.html?pos=POS-2`;
+            document.getElementById('btn-pos3').href = `${baseUrl}/scan.html?pos=POS-3`;
+            document.getElementById('btn-pos4').href = `${baseUrl}/scan.html?pos=POS-4`;
+
+            // Jika URL dibuka dengan parameter ?auto=dashboard atau ?auto=pos1, langsung redirect otomatis!
+            const params = new URLSearchParams(window.location.search);
+            const autoTarget = params.get('auto');
+            if (autoTarget === 'dashboard') window.location.replace(`${baseUrl}/login.html`);
+            if (autoTarget === 'pos1') window.location.replace(`${baseUrl}/scan.html?pos=POS-1`);
+            if (autoTarget === 'pos2') window.location.replace(`${baseUrl}/scan.html?pos=POS-2`);
+            if (autoTarget === 'pos3') window.location.replace(`${baseUrl}/scan.html?pos=POS-3`);
+            if (autoTarget === 'pos4') window.location.replace(`${baseUrl}/scan.html?pos=POS-4`);
+
+            menuLinks.classList.remove('hidden');
+        }
+
+        ambilLinkTerbaru();
+    </script>
+</body>
+</html>
